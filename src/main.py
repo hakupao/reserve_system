@@ -31,8 +31,6 @@ def main():
         merged_file = file_handler.save_merged_results(all_results)
         # 生成表格图片
         file_handler.generate_table_image(merged_file)
-        # 比较结果
-        file_handler.compare_results()
     else:
         print("\n所有搜索任务都失败了，请检查错误信息")
     

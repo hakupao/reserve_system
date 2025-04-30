@@ -94,7 +94,6 @@ def generate_table_image(csv_path, output_path):
     for search_type, group in grouped:
         # 按设施名称和室场名称分组
         facility_groups = group.groupby(['设施名称', '室场名称'])
-        
         for (facility, room), sub_group in facility_groups:
             # 合并日期和时间段，每两个时间段换一行
             date_times = sub_group['日期和时间段'].unique()
@@ -123,17 +122,17 @@ def generate_table_image(csv_path, output_path):
     row_heights = []
     for row in table_data:
         max_lines = max(len(str(cell).split('\n')) for cell in row)
-        row_heights.append(max_lines * 0.03 + 0.01)  # 减小基础高度和每行文本的高度
+        row_heights.append(max_lines * 0.025 + 0.01)  # 减小整体行高
     
     # 设置单元格边框、字体和行高
     for i in range(len(table_data)):
         for j in range(4):
             cell = table[i, j]
-            cell.set_edgecolor('black')
-            cell.set_linewidth(1)
+            cell.visible_edges = "LTRB"  # 显示全部边框
             cell.set_text_props(fontproperties=chinese_font)
             cell.set_height(row_heights[i])
             cell._text.set_wrap(True)
+            cell._text.set_linespacing(1.75)  # 增加行内文字间距
     
     # 调整整体表格大小（减小缩放比例）
     table.scale(1.0, 1.2)
@@ -149,11 +148,24 @@ if __name__ == "__main__":
     # 获取当前文件所在目录
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # 构建CSV文件路径（假设CSV文件在output目录下）
-    csv_path = os.path.join(current_dir, "..", "..", "output", "all_results.csv")
+    # 构建output目录路径
+    output_dir = os.path.join(current_dir, "..", "..", "output")
     
-    # 构建输出图片路径
-    output_path = os.path.join(current_dir, "..", "..", "output", "results_table.png")
+    # 获取output目录下所有文件夹
+    folders = [f for f in os.listdir(output_dir) if os.path.isdir(os.path.join(output_dir, f))]
+    
+    if not folders:
+        print("错误：output目录下没有找到任何文件夹")
+        exit(1)
+    
+    # 按修改时间排序，获取最新的文件夹
+    latest_folder = max(folders, key=lambda f: os.path.getmtime(os.path.join(output_dir, f)))
+    
+    # 构建CSV文件路径
+    csv_path = os.path.join(output_dir, latest_folder, "all_results.csv")
+    
+    # 构建输出图片路径（保存在同一文件夹中）
+    output_path = os.path.join(output_dir, latest_folder, "results_table.png")
     
     try:
         generate_table_image(csv_path, output_path)

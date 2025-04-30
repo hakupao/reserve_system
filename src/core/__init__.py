@@ -5,6 +5,5 @@
 
 from .search.executor import SearchExecutor
 from .utils.file_handler import FileHandler
-from .utils.result_comparator import ResultComparator
 
-__all__ = ['SearchExecutor', 'FileHandler', 'ResultComparator'] 
+__all__ = ['SearchExecutor', 'FileHandler'] 

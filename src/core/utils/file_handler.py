@@ -8,14 +8,12 @@ import shutil
 from datetime import datetime
 from utils.csv_utils import CSVHandler
 from utils.table_generator import generate_table_image
-from .result_comparator import ResultComparator
 
 class FileHandler:
     def __init__(self):
         self.csv_handler = CSVHandler()
         self.base_output_dir = os.path.join(os.getcwd(), "output")
         os.makedirs(self.base_output_dir, exist_ok=True)
-        self.result_comparator = ResultComparator(self.base_output_dir)
         self.current_timestamp = None
         self.current_dir = None
         
@@ -39,15 +37,6 @@ class FileHandler:
             dirs.sort()
             for old_dir in dirs[:-2]:
                 shutil.rmtree(os.path.join(self.base_output_dir, old_dir))
-                
-    def _get_latest_dir(self):
-        """获取最新的输出目录"""
-        dirs = [d for d in os.listdir(self.base_output_dir) 
-                if os.path.isdir(os.path.join(self.base_output_dir, d)) 
-                and d != "differ"]
-        if not dirs:
-            return None
-        return os.path.join(self.base_output_dir, max(dirs))
         
     def save_task_results(self, results, task_name):
         """
@@ -82,36 +71,6 @@ class FileHandler:
         self._cleanup_old_dirs()
         
         return merged_file
-        
-    def compare_results(self):
-        """
-        比较两次结果并保存差异
-        :return: 差异结果字典
-        """
-        current_dir = self._get_timestamp_dir()
-        previous_dir = self._get_latest_dir()
-        
-        if not previous_dir or previous_dir == current_dir:
-            print("没有找到上一次的结果，无法进行比较")
-            return None
-            
-        # 创建差异目录
-        differ_dir = os.path.join(self.base_output_dir, "differ")
-        os.makedirs(differ_dir, exist_ok=True)
-        
-        # 比较所有结果文件
-        all_diffs = {}
-        for file in os.listdir(current_dir):
-            if file.endswith('.csv'):
-                current_file = os.path.join(current_dir, file)
-                previous_file = os.path.join(previous_dir, file)
-                
-                if os.path.exists(previous_file):
-                    diffs = self.result_comparator.compare(current_file, previous_file)
-                    if diffs:
-                        all_diffs[file] = diffs
-                        
-        return all_diffs
             
     def generate_table_image(self, merged_file):
         """
