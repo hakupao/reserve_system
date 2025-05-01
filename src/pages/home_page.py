@@ -28,11 +28,38 @@ def open_website(driver, url):
 def click_date_tab_button(driver):
     try:
         print("正在点击'日時から探す'标签...")
-        button = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable((By.XPATH, "//a[contains(@class, 'nav-link')]//li[contains(@class, 'tab-name') and contains(text(), '日時から探す')]"))
-        )
-        button.click()
+        
+        # 等待页面完全加载
         time.sleep(1)
+        
+        # 使用更精确的XPath定位元素
+        button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//a[contains(@class, 'nav-link')]//li[contains(@class, 'tab-name') and contains(text(), '日時から探す')]"))
+        )
+        
+        # 滚动到元素位置
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", button)
+        time.sleep(0.5)
+        
+        # 确保元素可见和可点击
+        driver.execute_script("arguments[0].style.display='block';", button)
+        driver.execute_script("arguments[0].style.visibility='visible';", button)
+        time.sleep(0.5)
+        
+        # 尝试多种点击方式
+        try:
+            # 方法1：直接点击
+            button.click()
+        except:
+            try:
+                # 方法2：使用JavaScript点击
+                driver.execute_script("arguments[0].click();", button)
+            except:
+                # 方法3：使用ActionChains点击
+                ActionChains(driver).move_to_element(button).click().perform()
+        
+        time.sleep(1)
+        print("成功点击日期标签按钮")
         return True
     except Exception as e:
         print(f"点击标签时发生错误: {str(e)}")

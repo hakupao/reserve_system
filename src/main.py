@@ -8,7 +8,7 @@ from core import SearchExecutor, FileHandler
 
 def main():
     # ChromeDriver路径
-    chromedriver_path = r"C:\Local\test\reserve_system\chromedriver-win64\chromedriver.exe"
+    chromedriver_path = r"chromedriver-win64\chromedriver.exe"
     
     # 初始化组件
     search_executor = SearchExecutor(chromedriver_path)
