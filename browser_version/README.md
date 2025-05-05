@@ -29,7 +29,7 @@ browser_version/
 │   ├── pages/             # 页面操作模块
 │   └── utils/             # 通用工具
 ├── output/                # 输出文件目录
-├── chromedriver-win64/    # ChromeDriver
+└── chromedriver-win64/    # ChromeDriver
 ```
 
 ## 输出文件结构
