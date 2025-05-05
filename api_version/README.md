@@ -14,10 +14,7 @@
 
 - `main.py`: 主程序，包含API客户端类和主函数
 - `config.py`: 配置文件，定义了API设置、搜索参数和输出选项
-- `requirements.txt`: 依赖包列表
-- `fetch/`: 包含参考用的网络请求档案(HAR文件)
 - `output/`: 结果输出目录
-- `save_html.py`: 辅助工具，用于保存网页内容以便分析
 
 **注意**: 根目录下可能存在的`homepage.html`和`facilities.html`文件是调试时生成的临时文件，不是必需的。可以安全删除。
 
