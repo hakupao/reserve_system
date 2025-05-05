@@ -15,7 +15,7 @@ SEARCH_TASKS = [
         "output_file": "weekday_results.csv"
     },
     {
-        "name": "周末",
+        "name": "周末和假日",
         "start_time": "0900",        # 开始时间，格式：HHMM
         "end_time": "2100",          # 结束时间，格式：HHMM
         "selected_days": [6, 7],     # 土曜日和日曜日
