@@ -1,88 +1,62 @@
 # 横滨市设施预约系统
 
-这是一个自动化系统，用于监控和追踪横滨市公共设施的预约情况。系统通过定期检查指定设施的预约状态，并将结果以结构化的方式保存和展示。
-
-## 主要功能
-
-- 🎯 多设施并发搜索：同时监控多个设施的预约情况
-- 📊 数据可视化：自动生成预约状态表格图片
-- 📁 智能文件管理：自动清理和归档历史数据
-- 📝 数据导出：支持 CSV 格式导出
-
-## 技术栈
-
-- Python 3.8+
-- Selenium 4.18.1：用于网页自动化
-- Pandas 2.2.1：数据处理和分析
-- Pillow 10.2.0：图像处理
-- WebDriver Manager 4.0.1：ChromeDriver 管理
+这是一个工具集，用于监控和查询横滨市公共设施的预约情况。系统提供两种不同的实现方式：
 
 ## 项目结构
 
 ```
 reserve_system/
-├── src/                    # 源代码目录
-│   ├── core/              # 核心功能模块
-│   │   ├── search/        # 搜索相关功能
-│   │   └── utils/         # 工具类
-│   ├── config/            # 配置文件
-│   ├── pages/             # 页面操作模块
-│   └── utils/             # 通用工具
-├── output/                # 输出文件目录
-├── chromedriver-win64/    # ChromeDriver
-└── requirements.txt       # 依赖包列表
+├── browser_version/       # 模拟浏览器执行版本
+│   ├── src/               # 源代码
+│   ├── output/            # 输出结果
+│   ├── chromedriver-win64/ # ChromeDriver
+│   └── README.md          # 浏览器版本说明文档
+│
+├── api_version/           # API调用版本 
+│   ├── output/            # 输出结果
+│   └── README.md          # API版本说明文档
+│
+└── requirements.txt       # 整体项目依赖
 ```
 
-## 输出文件结构
+## 功能版本
 
-```
-output/
-├── 20240220_123456/          # 当前执行结果目录
-│   ├── task1.csv            # 设施1的预约数据
-│   ├── task2.csv            # 设施2的预约数据
-│   ├── all_results.csv      # 合并后的所有数据
-│   └── results_table.png    # 可视化表格
-└── 20240220_120000/         # 上一次执行结果
-```
+### 1. 模拟浏览器版本 (browser_version)
 
-## 快速开始
+通过Selenium模拟浏览器访问和操作横滨市设施预约系统网站，自动化查询和监控设施预约情况。
 
-1. 环境准备：
-   ```bash
-   # 创建虚拟环境（推荐）
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   .\venv\Scripts\activate   # Windows
+**主要特点**：
+- 多设施并发搜索
+- 数据可视化处理
+- 智能文件管理
 
-   # 安装依赖
-   pip install -r requirements.txt
-   ```
+详情请参阅 [浏览器版本文档](./browser_version/README.md)
 
-2. 配置搜索任务：
-   - 编辑 `src/config/search_tasks_config.py`
-   - 添加或修改需要监控的设施信息
+### 2. API版本 (api_version)
 
-3. 运行程序：
-   ```bash
-   python src/main.py
-   ```
+通过直接调用横滨市设施预约系统的API接口获取数据，实现高效的设施预约情况查询。
 
-## 注意事项
+**主要特点**：
+- 直接API调用，无需浏览器
+- 支持按区域、日期和时间搜索
+- 结果保存为JSON格式
 
-- 确保已安装 Chrome 浏览器
-- ChromeDriver 版本需与 Chrome 浏览器版本匹配
-- 建议使用虚拟环境运行程序
-- 定期检查并更新依赖包
+详情请参阅 [API版本文档](./api_version/README.md)
 
-## 文件管理说明
+## 使用指南
 
-- 系统自动创建时间戳命名的结果目录
-- 保留最新的两个执行结果
-- 自动清理过期的结果文件
+根据您的需求选择适合的版本：
+- 如果需要完整的可视化结果和界面交互，请使用**浏览器版本**
+- 如果追求高效率和轻量级操作，请使用**API版本**
 
-## 维护说明
+每个版本目录下都包含详细的使用说明和配置指南。
 
-- 定期检查 ChromeDriver 版本
-- 监控系统运行日志
-- 及时更新配置文件
-- 定期备份重要数据 
+## 环境要求
+
+请确保已安装以下环境：
+- Python 3.8+
+- 相关依赖包(详见各版本的requirements.txt)
+
+## 开源许可
+
+本项目仅供学习和研究使用，请遵守相关网站的使用条款。 

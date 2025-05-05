@@ -9,7 +9,7 @@ def setup_driver(chromedriver_path=None):
     try:
         # 设置 Chrome 选项
         chrome_options = Options()
-        # chrome_options.add_argument('--headless')  # 无头模式，取消注释可以隐藏浏览器窗口
+        chrome_options.add_argument('--headless')  # 无头模式，取消注释可以隐藏浏览器窗口
         
         # 添加一些额外的选项来避免常见问题
         chrome_options.add_argument('--no-sandbox')

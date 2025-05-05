@@ -68,12 +68,17 @@ class SearchExecutor:
                 
             # 加载并获取搜索结果
             results = load_all_results(driver)
-            if results is None:
-                raise Exception("无法获取搜索结果")
-                
+            # 注意：load_all_results现在总是返回DataFrame，可能是空的
+            
             # 添加搜索类型列
             results['search_type'] = task_config['name']
             
+            # 检查是否有数据
+            if len(results) == 0:
+                print(f"{task_config['name']}：无符合条件的结果")
+            else:
+                print(f"{task_config['name']}：找到 {len(results)} 条结果")
+                
             return results
             
         except Exception as e:

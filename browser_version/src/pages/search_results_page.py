@@ -11,10 +11,23 @@ def load_all_results(driver):
     """
     加载并获取所有搜索结果
     :param driver: WebDriver实例
-    :return: 包含所有搜索结果的DataFrame
+    :return: 包含所有搜索结果的DataFrame，若无结果则返回空DataFrame
     """
     try:
         print("正在等待搜索结果加载...")
+        
+        # 首先检查是否出现"无结果"消息
+        try:
+            no_result_element = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".message-no-data"))
+            )
+            if "条件に該当する施設はありません" in no_result_element.text:
+                print("搜索无结果：条件に該当する施設はありません")
+                # 返回一个空的DataFrame而不是None
+                return pd.DataFrame(columns=["设施名称", "室场名称", "日期", "时间段", "设施代码", "室场代码", "使用日期"])
+        except:
+            # 没有找到"无结果"消息，继续正常处理
+            pass
         
         # 等待表格加载完成
         table = WebDriverWait(driver, 10).until(
@@ -119,7 +132,8 @@ def load_all_results(driver):
         
         if not all_data:
             print("未能提取到任何有效数据")
-            return None
+            # 返回空DataFrame而不是None
+            return pd.DataFrame(columns=["设施名称", "室场名称", "日期", "时间段", "设施代码", "室场代码", "使用日期"])
             
         # 转换为DataFrame
         df = pd.DataFrame(all_data)
@@ -128,4 +142,5 @@ def load_all_results(driver):
         
     except Exception as e:
         print(f"获取搜索结果时发生错误: {str(e)}")
-        return None 
+        # 即使出错也返回空DataFrame而不是None
+        return pd.DataFrame(columns=["设施名称", "室场名称", "日期", "时间段", "设施代码", "室场代码", "使用日期"]) 

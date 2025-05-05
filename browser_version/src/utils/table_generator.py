@@ -65,6 +65,36 @@ def generate_table_image(csv_path, output_path):
     # 获取中文字体
     chinese_font = get_chinese_font()
     
+    # 检查是否有数据
+    if len(df) == 0:
+        # 创建一个"无结果"的表格
+        plt.rcParams['font.sans-serif'] = ['SimHei']
+        plt.rcParams['axes.unicode_minus'] = False
+        
+        fig, ax = plt.subplots(figsize=(10, 3))
+        ax.axis('off')
+        
+        table_data = [["搜索结果"], ["无符合条件的设施"]]
+        table = ax.table(cellText=table_data,
+                        cellLoc='center',
+                        loc='center',
+                        cellColours=[['lightgray']] + [['white']])
+        
+        table.auto_set_font_size(False)
+        table.set_fontsize(12)
+        
+        for i in range(len(table_data)):
+            cell = table[i, 0]
+            cell.visible_edges = "LTRB"
+            cell.set_text_props(fontproperties=chinese_font)
+            cell.set_width(1.0)
+            cell.set_height(0.2)
+        
+        table.scale(1.0, 2.0)
+        plt.savefig(output_path, bbox_inches='tight', dpi=300, pad_inches=0.1)
+        plt.close()
+        return
+    
     # 合并日期和时间段
     df['日期和时间段'] = df['日期'] + ' ' + df['时间段']
     

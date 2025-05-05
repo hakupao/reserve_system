@@ -12,7 +12,7 @@ from utils.table_generator import generate_table_image
 class FileHandler:
     def __init__(self):
         self.csv_handler = CSVHandler()
-        self.base_output_dir = os.path.join(os.getcwd(), "output")
+        self.base_output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "output")
         os.makedirs(self.base_output_dir, exist_ok=True)
         self.current_timestamp = None
         self.current_dir = None
