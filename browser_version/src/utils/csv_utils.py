@@ -3,11 +3,17 @@ import os
 from datetime import datetime
 
 class CSVHandler:
-    def __init__(self, output_dir="output"):
+    def __init__(self, output_dir=None):
         """
         初始化CSV处理器
         :param output_dir: 输出目录
         """
+        if output_dir is None:
+            # 默认使用browser_version目录下的output文件夹
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            # 从utils目录向上导航两层到browser_version目录
+            browser_version_dir = os.path.dirname(os.path.dirname(current_dir))
+            output_dir = os.path.join(browser_version_dir, "output")
         self.output_dir = output_dir
         # 确保输出目录存在
         os.makedirs(output_dir, exist_ok=True)

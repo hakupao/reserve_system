@@ -12,7 +12,10 @@ from utils.table_generator import generate_table_image
 class FileHandler:
     def __init__(self):
         self.csv_handler = CSVHandler()
-        self.base_output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "output")
+        # 获取当前文件所在目录，再向上导航3层到browser_version目录，然后指向output
+        current_file_dir = os.path.dirname(os.path.abspath(__file__))
+        browser_version_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_file_dir)))
+        self.base_output_dir = os.path.join(browser_version_dir, "output")
         os.makedirs(self.base_output_dir, exist_ok=True)
         self.current_timestamp = None
         self.current_dir = None

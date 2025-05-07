@@ -13,6 +13,13 @@ reserve_system/
 │   └── README.md          # 浏览器版本说明文档
 │
 ├── api_version/           # API调用版本 
+│   ├── __init__.py        # 包初始化文件
+│   ├── main.py            # 主程序入口
+│   ├── api_client.py      # API客户端模块
+│   ├── parsers.py         # HTML解析器模块
+│   ├── output_handlers.py # 输出处理模块
+│   ├── utils.py           # 工具函数模块
+│   ├── config.py          # 配置文件
 │   ├── output/            # 输出结果
 │   └── README.md          # API版本说明文档
 │
@@ -39,7 +46,17 @@ reserve_system/
 **主要特点**：
 - 直接API调用，无需浏览器
 - 支持按区域、日期和时间搜索
-- 结果保存为JSON格式
+- 结果保存为JSON和CSV格式
+- 模块化设计，便于维护和扩展
+- 自动会话管理和token处理
+- 智能重试机制和错误处理
+
+**模块说明**：
+- `api_client.py`: 处理所有API通信，包括会话管理、请求发送和响应处理
+- `parsers.py`: 负责解析HTML内容，提取设施信息
+- `output_handlers.py`: 处理数据输出，支持JSON和CSV格式
+- `utils.py`: 提供日期处理、日志记录等通用功能
+- `config.py`: 集中管理配置参数
 
 详情请参阅 [API版本文档](./api_version/README.md)
 
@@ -55,7 +72,27 @@ reserve_system/
 
 请确保已安装以下环境：
 - Python 3.8+
-- 相关依赖包(详见各版本的requirements.txt)
+- 相关依赖包(详见requirements.txt)
+
+### 安装依赖
+
+安装项目所需的所有依赖：
+```bash
+pip install -r requirements.txt
+```
+
+注意：
+- 建议使用虚拟环境安装依赖，避免与系统Python环境冲突
+- 如果使用虚拟环境，请先创建并激活虚拟环境：
+  ```bash
+  # Windows
+  python -m venv venv
+  .\venv\Scripts\activate
+
+  # Linux/Mac
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
 
 ## 开源许可
 
