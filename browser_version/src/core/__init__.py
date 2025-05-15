@@ -5,5 +5,6 @@
 
 from .search.executor import SearchExecutor
 from .utils.file_handler import FileHandler
+from .chouseisan.updater import ChouseisanUpdater
 
-__all__ = ['SearchExecutor', 'FileHandler'] 
+__all__ = ['SearchExecutor', 'FileHandler', 'ChouseisanUpdater'] 

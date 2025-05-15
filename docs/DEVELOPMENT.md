@@ -49,6 +49,20 @@ pip install -r requirements.txt
 - 使用Google风格的文档字符串格式
 - 保持README文件及时更新
 
+## 项目结构
+
+### 浏览器版本模块化结构
+浏览器版本中的ChouseisanUpdater已经被重构为模块化结构：
+
+- `browser.py` - 浏览器基础操作模块
+- `element_handler.py` - 元素操作工具模块
+- `login_handler.py` - 登录处理模块
+- `results_handler.py` - 结果处理模块
+- `utils.py` - 工具函数模块
+- `updater.py` - 主类（整合其他模块）
+
+每个模块负责特定的功能，遵循单一职责原则，降低了代码耦合度，提高了可维护性。
+
 ## 测试指南
 
 ### 运行测试
@@ -83,6 +97,14 @@ DEBUG=False
 - INFO：常规操作信息
 - WARNING：警告信息
 - ERROR：错误信息
+
+### 日志系统
+系统使用Python标准日志库，主要日志记录器包括：
+- `ChouseisanBrowser` - 主日志记录器
+- `ChouseisanBrowser.ElementHandler` - 元素处理日志
+- `ChouseisanBrowser.LoginHandler` - 登录处理日志
+- `ChouseisanBrowser.ResultsHandler` - 结果处理日志
+- `ChouseisanBrowser.Utils` - 工具函数日志
 
 ### 常见问题解决
 1. API连接问题

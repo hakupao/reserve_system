@@ -30,6 +30,8 @@ python browser_version/src/main.py
 - 多设施并发搜索
 - 数据可视化处理
 - 智能文件管理
+- 模块化设计的调整さん更新工具
+- 完善的日志系统
 
 [查看详细文档](./browser_version/README.md)
 
@@ -40,6 +42,14 @@ python browser_version/src/main.py
 - 模块化设计，便于维护和扩展
 
 [查看详细文档](./api_version/README.md)
+
+## 最新更新
+
+- **模块化重构**：ChouseisanUpdater已重构为模块化结构，提高了代码可维护性
+- **强化日志系统**：添加了全面的日志记录系统
+- **改进的数据处理**：优化从output读取数据的流程
+
+详细更新内容请查看[变更日志](./docs/CHANGELOG.md)。
 
 ## 文档
 
