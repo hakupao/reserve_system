@@ -5,14 +5,43 @@
 import os
 import logging
 import time
+import sys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from browser_version.src.utils.driver_utils import setup_driver
 
 # 获取模块日志记录器
 logger = logging.getLogger('ChouseisanBrowser')
+
+# 尝试不同的导入方式来获取setup_driver函数
+setup_driver = None
+
+# 方法1：添加项目根目录到系统路径
+try:
+    # 添加项目根目录到系统路径
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../'))
+    sys.path.insert(0, project_root)
+    from browser_version.src.utils.driver_utils import setup_driver
+    logger.info("成功通过绝对导入获取setup_driver")
+except ImportError:
+    logger.info("绝对导入失败，尝试其他方法")
+
+# 方法2：直接导入utils模块
+if setup_driver is None:
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "driver_utils", 
+            os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../utils/driver_utils.py'))
+        )
+        driver_utils = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(driver_utils)
+        setup_driver = driver_utils.setup_driver
+        logger.info("成功通过动态导入获取setup_driver")
+    except (ImportError, FileNotFoundError, AttributeError):
+        logger.error("所有导入方法都失败了")
+        raise ImportError("无法导入setup_driver函数，请检查项目结构")
 
 class Browser:
     """浏览器基础操作类"""
