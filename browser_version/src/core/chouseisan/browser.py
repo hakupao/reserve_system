@@ -5,12 +5,11 @@
 import os
 import logging
 import time
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from browser_version.src.utils.driver_utils import setup_driver
 
 # 获取模块日志记录器
 logger = logging.getLogger('ChouseisanBrowser')
@@ -18,13 +17,13 @@ logger = logging.getLogger('ChouseisanBrowser')
 class Browser:
     """浏览器基础操作类"""
     
-    def __init__(self, chromedriver_path, headless=False):
+    def __init__(self, chromedriver_path=None, headless=True):
         """
         初始化浏览器
         
         Args:
-            chromedriver_path: ChromeDriver的路径
-            headless: 是否使用无头模式（默认为False，显示浏览器窗口）
+            chromedriver_path: ChromeDriver的路径（可选）
+            headless: 是否使用无头模式（默认为True，不显示浏览器窗口）
         """
         self.chromedriver_path = chromedriver_path
         self.headless = headless
@@ -35,20 +34,7 @@ class Browser:
         logger.info("初始化浏览器...")
         
         try:
-            service = Service(executable_path=self.chromedriver_path)
-            options = webdriver.ChromeOptions()
-            
-            if self.headless:
-                options.add_argument('--headless')
-            
-            options.add_argument('--disable-gpu')
-            options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
-            
-            # 添加防止浏览器自动关闭的选项
-            options.add_experimental_option("detach", True)
-            
-            self.driver = webdriver.Chrome(service=service, options=options)
+            self.driver = setup_driver(self.chromedriver_path)
             self.driver.maximize_window()
             logger.info("浏览器初始化成功")
             return True
