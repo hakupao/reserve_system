@@ -196,6 +196,9 @@ class ResultsHandler:
             ):
                 logger.error("无法找到或点击保存按钮")
                 return False
+            
+            # 添加短暂延迟以确保JavaScript事件触发
+            time.sleep(2)
                 
             logger.info("已点击保存按钮，更新完成")
             return True
