@@ -102,6 +102,62 @@ class Browser:
             logger.error(f"打开网页失败: {str(e)}")
             return False
     
+    def find_element(self, by, value, timeout=10):
+        """
+        查找单个元素
+        
+        Args:
+            by: 定位方式（By.ID, By.CLASS_NAME等）
+            value: 定位值
+            timeout: 超时时间（秒）
+            
+        Returns:
+            WebElement: 找到的元素，如果未找到则返回None
+        """
+        if not self.driver:
+            if not self.init_browser():
+                return None
+        
+        try:
+            element = WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_element_located((by, value))
+            )
+            return element
+        except TimeoutException:
+            logger.error(f"未找到元素: {by}={value}")
+            return None
+        except Exception as e:
+            logger.error(f"查找元素时出错: {str(e)}")
+            return None
+    
+    def find_elements(self, by, value, timeout=10):
+        """
+        查找多个元素
+        
+        Args:
+            by: 定位方式（By.ID, By.CLASS_NAME等）
+            value: 定位值
+            timeout: 超时时间（秒）
+            
+        Returns:
+            list: 找到的元素列表，如果未找到则返回空列表
+        """
+        if not self.driver:
+            if not self.init_browser():
+                return []
+        
+        try:
+            elements = WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_all_elements_located((by, value))
+            )
+            return elements
+        except TimeoutException:
+            logger.error(f"未找到元素: {by}={value}")
+            return []
+        except Exception as e:
+            logger.error(f"查找元素时出错: {str(e)}")
+            return []
+    
     def close(self):
         """关闭浏览器"""
         if self.driver:

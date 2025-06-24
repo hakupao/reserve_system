@@ -25,7 +25,7 @@ SEARCH_CONFIG = {
         "from": "0900",
         "to": "2100"
     },
-    "default_areas": [5, 14, 15],  # 默认搜索区域
+    "default_areas": [5, 14, 15],  # 默认搜索区域（已验证有效）
     "default_purpose_category": 1,  # 默认用途类别
     "default_place_class_category": 1,  # 默认设施类别
     "default_weekdays": [1, 2, 3, 4, 5, 6, 7, 8],  # 默认搜索星期：6=周六, 7=周日, 8=节假日
@@ -33,6 +33,12 @@ SEARCH_CONFIG = {
     "default_language_code": 0,  # 语言代码
     "default_purpose": 1,  # 用途
     "default_place_class": 1,  # 设施类别
+    # 时间范围限制说明
+    "time_range_limits": {
+        "max_days": 21,  # 系统最大支持约21天
+        "recommended_days": 7,  # 建议使用7天以确保稳定性
+        "note": "超过21天会返回E-yokohama-202-000014错误"
+    }
 }
 
 # 输出配置

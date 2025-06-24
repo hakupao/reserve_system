@@ -1,256 +1,226 @@
-# 横滨市设施预约系统 API 版本
+# 横滨市设施预约系统 API版本
 
-这是一个用于获取横滨市公共设施预约信息的API客户端程序。
+基于直接API调用的横滨市设施预约系统，用于自动搜索和获取可用设施信息。
 
-## 功能特点
+## 🚀 功能特点
 
-- 支持使用API直接获取横滨市设施预约信息
-- 自动处理会话令牌和请求验证
-- 支持按区域、日期和时间搜索空闲设施
-- 自动解析返回的数据，包括HTML和JSON格式
-- 结果保存为JSON和CSV格式
-- 模块化设计，便于维护和扩展
-- 智能重试机制和错误处理
+- ✅ **自动设施搜索** - 根据日期、时间、区域自动搜索可用设施
+- ✅ **多格式输出** - 支持JSON和CSV格式结果保存
+- ✅ **智能会话管理** - 自动处理验证token和会话状态
+- ✅ **错误恢复机制** - 自动重试和会话重建
+- ✅ **configurable配置** - 灵活的搜索参数配置
 
-## 项目结构
+## 📁 项目结构
 
 ```
 api_version/
-├── __init__.py        # 包初始化文件
-├── main.py            # 主程序入口
-├── api_client.py      # API客户端模块
-├── parsers.py         # HTML解析器模块
-├── output_handlers.py # 输出处理模块
-├── utils.py           # 工具函数模块
-├── config.py          # 配置文件
-└── output/            # 结果输出目录
+├── main.py              # 主程序入口
+├── api_client.py        # 核心API客户端
+├── config.py           # 配置文件
+├── utils.py            # 工具函数
+├── output_handlers.py  # 输出处理模块
+├── parsers.py          # 数据解析模块
+├── har_analyzer.py     # HAR文件分析工具
+├── multipart_parser.py # Multipart数据解析器
+├── output/             # 输出结果目录
+└── README.md           # 项目文档
 ```
 
-## 模块说明
+## 🛠️ 安装和配置
 
-### 1. API客户端模块 (api_client.py)
-- 处理所有API通信
-- 管理会话和令牌
-- 实现请求重试机制
-- 处理请求头和表单数据
+### 环境要求
 
-### 2. 解析器模块 (parsers.py)
-- 解析HTML内容
-- 提取设施信息
-- 处理表格数据
-- 提取日期和区域信息
+- Python 3.7+
+- requests 库
+- beautifulsoup4 库
 
-### 3. 输出处理模块 (output_handlers.py)
-- 管理输出目录结构
-- 保存JSON格式数据
-- 生成CSV格式报告
-- 处理文件命名和路径
-
-### 4. 工具函数模块 (utils.py)
-- 日期处理功能
-- 日志记录工具
-- 通用辅助函数
-- 结果摘要生成
-
-### 5. 配置文件 (config.py)
-- API相关配置
-- 搜索参数设置
-- 输出选项配置
-- 系统常量定义
-
-## 安装
-
-1. 确保安装了Python 3.8+
-2. 安装依赖库：
+### 安装依赖
 
 ```bash
-pip install -r requirements.txt
+pip install requests beautifulsoup4
 ```
 
-## 使用方法
+### 配置参数
 
-运行主程序：
-
-```bash
-python main.py
-```
-
-默认情况下，程序将：
-1. 搜索接下来30天内指定区域的可用设施
-2. 将结果保存为JSON和CSV格式
-3. 在output目录下创建时间戳子目录
-4. 生成结果摘要
-
-## 配置文件详细说明
-
-配置文件`config.py`分为三个主要部分：
-
-### 1. API 配置 (API_CONFIG)
+编辑 `config.py` 文件中的搜索参数：
 
 ```python
-API_CONFIG = {
-    "base_url": "https://www.shisetsu.city.yokohama.lg.jp/user",  # API基础URL
-    "timeout": 30,            # 请求超时时间（秒）
-    "retry_times": 3,         # 请求失败时的重试次数
-    "retry_delay": 5,         # 重试间隔（秒）
-    "request_interval": 3,    # 两次请求之间的最小间隔（秒），避免请求过于频繁
-    "session_expire": 1800,   # 会话过期时间（秒），超过此时间会重新获取令牌
-    "endpoints": {            # API端点路径
-        "search": "/Home/SearchByDateTime",           # 搜索设施的端点
-        "detail": "/user/VacantFrameFacilityStatus",  # 获取详细信息的端点
-        "session": "/api/Header/GetSessionInterval",  # 获取会话间隔的端点
-        "site_status": "/api/Header/GetSiteClosing"   # 获取站点状态的端点
+SEARCH_CONFIG = {
+    "default_areas": [5, 14, 15],           # 搜索区域（已验证有效）
+    "default_time_range": {
+        "from": "0900",                     # 开始时间
+        "to": "2100"                        # 结束时间
+    },
+    "time_range_limits": {
+        "max_days": 21,                     # 系统最大支持天数
+        "recommended_days": 7,              # 建议天数
+        "note": "超过21天会返回E-yokohama-202-000014错误"
     }
 }
 ```
 
-### 2. 搜索配置 (SEARCH_CONFIG)
+## 🏃‍♂️ 使用方法
 
-```python
-SEARCH_CONFIG = {
-    "default_time_range": {   # 默认时间范围
-        "from": "0900",       # 开始时间（24小时制，无冒号）
-        "to": "2100"          # 结束时间（24小时制，无冒号）
-    },
-    "default_areas": [5, 14, 15],  # 默认搜索区域ID
-    # 区域ID参考:
-    # 5 = 神奈川区
-    # 14 = 西区
-    # 15 = 中区
-    # 可添加更多区域ID
-    
-    "default_purpose_category": 1,     # 默认用途类别ID
-    "default_place_class_category": 1, # 默认设施类别ID
-    "default_weekdays": [1, 2, 3, 4, 5, 6, 7, 8],  # 默认搜索星期
-    # 星期ID参考:
-    # 1 = 周一
-    # 2 = 周二
-    # 3 = 周三
-    # 4 = 周四
-    # 5 = 周五
-    # 6 = 周六
-    # 7 = 周日
-    # 8 = 节假日
-    
-    "default_search_target": 1,    # 搜索目标（1=空闲设施）
-    "default_language_code": 0,    # 语言代码（0=日语）
-    "default_purpose": 1,          # 用途ID
-    "default_place_class": 1       # 设施类别ID
-}
+### 基本使用
+
+```bash
+cd api_version
+python main.py
 ```
 
-### 3. 输出配置 (OUTPUT_CONFIG)
+### 自定义搜索
 
 ```python
-OUTPUT_CONFIG = {
-    "output_dir": "output",             # 输出目录路径
-    "file_prefix": "api_results_",      # 输出文件名前缀
-    "file_extension": ".json"           # 输出文件扩展名
-}
-```
+from api_client import YokohamaFacilityAPI
+from utils import get_date_range
 
-## 自定义搜索参数
+# 创建API客户端
+api = YokohamaFacilityAPI()
 
-如需使用自定义参数搜索，可以修改配置文件或在代码中传递参数：
+# 设置搜索参数
+date_from, date_to = get_date_range(days=7)  # 搜索7天
 
-```python
-# 在代码中自定义搜索参数示例
+# 执行搜索
 results = api.search_facilities(
-    date_from="2025-06-01",         # 开始日期
-    date_to="2025-06-30",           # 结束日期
-    time_from="1800",               # 开始时间
-    time_to="2100",                 # 结束时间
-    areas=[5, 6, 7],                # 自定义区域
-    purpose_category=2,             # 自定义用途类别
-    place_class_category=3          # 自定义设施类别
+    date_from=date_from,
+    date_to=date_to,
+    areas=[5, 14, 15]  # 指定搜索区域
 )
 ```
 
-## 输出数据格式
+## 📊 输出格式
 
-程序输出的JSON文件包含以下主要字段：
-
+### JSON格式
 ```json
 {
-  "Result": "状态码",
-  "Information": "相对路径或其他信息",
+  "Result": "Ok",
+  "Information": "./VacantFrameFacilityStatus",
   "DetailData": {
-    "html_content": true,
-    "title": "页面标题",
     "facilities": [
       {
-        "No": "序号",
-        "施設": "设施名称",
-        "室場": "房间名称",
-        "日付": "可用日期",
-        "時間帯": "可用时间段",
-        "選択": "选择状态"
-      },
-      // 更多设施...
+        "No": "1",
+        "施设": "神奈川スポーツセンター",
+        "室场": "第一体育室Ａ（半面）",
+        "日期": "令和7年6月26日(木)",
+        "时间带": "13:00～15:00",
+        "选择": "选择"
+      }
     ]
   }
 }
 ```
 
-### CSV格式输出
-CSV文件包含以下列：
-- 施設（设施名称）
-- 室場（房间名称）
-- 日付（可用日期）
-- 時間帯（可用时间段）
+### CSV格式
+| No | 施设 | 室场 | 日期 | 时间带 | 选择 |
+|----|------|------|------|--------|------|
+| 1 | 神奈川スポーツセンター | 第一体育室Ａ（半面） | 令和7年6月26日(木) | 13:00～15:00 | 选择 |
 
-数据按日期和时间排序。
+## ⚙️ 配置说明
 
-## 主要问题修复记录
+### 区域代码对照表
 
-本程序曾经存在的主要问题及其修复：
+| 区域ID | 区域名称 | 状态 |
+|--------|----------|------|
+| 5 | 神奈川区 | ✅ 已验证 |
+| 14 | 保土ヶ谷区 | ✅ 已验证 |
+| 15 | 旭区 | ✅ 已验证 |
 
-1. **请求头设置错误**：
-   - 修正了Origin和Referer头部字段
-   - 修正了Content-Type设置
+### 时间范围限制
 
-2. **表单数据处理问题**：
-   - 修复了处理相同名称多值字段的问题
-   - 正确实现了URL编码和multipart请求
+- **推荐范围**: 7天（最佳稳定性）
+- **最大范围**: 21天（系统限制）
+- **注意**: 超过21天会返回`E-yokohama-202-000014`错误
 
-3. **请求路径处理**：
-   - 修正了相对路径的处理方式
-   - 增强了URL构建逻辑
+### 搜索参数说明
 
-4. **HTML内容提取**：
-   - 增加了从HTML中提取有用数据的功能
-   - 支持解析表格、日期范围和区域信息
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `date_from` | 搜索开始日期 | 今天 |
+| `date_to` | 搜索结束日期 | 7天后 |
+| `areas` | 搜索区域列表 | [5, 14, 15] |
+| `time_from` | 时间范围开始 | "0900" |
+| `time_to` | 时间范围结束 | "2100" |
 
-## 数据解析待优化
+## 🔧 工具模块
 
-当前的HTML解析可能仍不完善，根据实际情况，可能需要：
+### har_analyzer.py
+用于分析浏览器HAR文件，提取网络请求信息。
 
-1. 进一步分析返回的HTML结构
-2. 扩展BeautifulSoup选择器以提取更多数据
-3. 模拟浏览器渲染（如有需要）
+```python
+from har_analyzer import HarAnalyzer
 
-## 工作原理
+analyzer = HarAnalyzer("path/to/har_file.har")
+analyzer.analyze_search_requests()
+```
 
-1. 初始化会话并获取验证令牌
-2. 使用令牌发送搜索请求
-3. 处理返回的JSON响应
-4. 如需要，获取并解析详细页面
-5. 合并所有数据并保存
+### multipart_parser.py
+用于解析multipart/form-data格式数据。
 
-## 依赖库
+```python
+from multipart_parser import MultipartParser
 
-- requests：HTTP请求库
-- beautifulsoup4：HTML解析
-- datetime：日期时间处理
-- json：JSON数据处理
-- os：文件系统操作
+parser = MultipartParser()
+parsed_data = parser.parse(form_data)
+```
 
-## 注意事项
+## 🐛 错误处理
 
-本程序仅供学习和研究使用，请勿用于任何商业用途。使用时请遵守相关网站的使用条款。
+### 常见错误代码
 
-为避免对目标网站造成负担，建议：
-1. 保持较大的请求间隔（至少3秒）
-2. 避免短时间内频繁运行程序
-3. 仅在必要时获取数据
-4. 合理设置搜索参数，避免过大范围的查询
+| 错误代码 | 说明 | 解决方案 |
+|----------|------|----------|
+| `E-yokohama-202-000014` | 请求参数验证失败 | 检查时间范围（不超过21天） |
+| `E-205-000004` | 会话状态异常 | 系统会自动重建会话 |
+
+### 调试模式
+
+设置环境变量启用详细日志：
+
+```bash
+export DEBUG=1
+python main.py
+```
+
+## 📝 输出文件
+
+所有结果保存在 `output/` 目录下：
+
+```
+output/
+├── api_results_20250624_123456.json    # JSON格式结果
+└── facilities_20250624_123456.csv      # CSV格式结果
+```
+
+## ⚠️ 注意事项
+
+1. **请求频率**: 系统会自动控制请求间隔，避免过于频繁的API调用
+2. **会话管理**: 程序会自动管理验证token和会话状态
+3. **时间限制**: 建议搜索时间范围不超过21天
+4. **区域选择**: 只使用已验证的有效区域ID
+
+## 🔄 更新日志
+
+### v2.0.0 (2025-06-24)
+- ✅ 修复E-yokohama-202-000014错误
+- ✅ 实现正确的multipart/form-data格式
+- ✅ 优化时间范围限制（7天推荐）
+- ✅ 验证区域5、14、15有效性
+- ✅ 清理临时调试文件
+
+### v1.0.0 (初始版本)
+- 基础API调用功能
+- JSON和CSV输出支持
+- 配置文件系统
+
+## 📞 技术支持
+
+如果遇到问题，请检查：
+
+1. **网络连接** - 确保可以访问横滨市官网
+2. **时间范围** - 不要超过21天
+3. **区域代码** - 使用已验证的区域ID
+4. **Python版本** - 确保使用Python 3.7+
+
+---
+
+**横滨市设施预约系统 API版本** - 高效、稳定的设施搜索解决方案 🏢

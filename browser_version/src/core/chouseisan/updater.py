@@ -183,7 +183,7 @@ def main():
         try:
             # 无限等待，直到用户按Ctrl+C中断
             while True:
-                time.sleep(60)
+                time.sleep(3)
         except KeyboardInterrupt:
             print("\n程序已退出，浏览器窗口仍保持打开")
         

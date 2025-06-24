@@ -10,6 +10,7 @@ import string
 from bs4 import BeautifulSoup
 from typing import Dict, List, Optional
 from config import API_CONFIG, SEARCH_CONFIG
+from urllib.parse import urlencode
 
 from parsers import parse_html_content
 
@@ -60,28 +61,59 @@ class YokohamaFacilityAPI:
         
         headers.update(common_headers)
         
-        # 处理不同类型的请求数据
+        # 对于POST请求，根据HAR分析使用multipart/form-data格式
         if method.upper() == 'POST':
-            # 检查请求数据类型
             data = kwargs.get('data', None)
             
-            # 如果是字典类型且包含token字段，且未指定Content-Type，则使用multipart/form-data
-            if isinstance(data, dict) and '__RequestVerificationToken' in data and 'content-type' not in headers:
+            # 检查是否需要使用multipart格式（基于HAR分析结果）
+            if isinstance(data, dict) and '__RequestVerificationToken' in data:
+                # 使用multipart/form-data格式，这是浏览器实际使用的格式
                 boundary = '----WebKitFormBoundary' + ''.join(random.choices(string.ascii_letters + string.digits, k=16))
-                headers['content-type'] = f'multipart/form-data; boundary={boundary}'
+                headers['Content-Type'] = f'multipart/form-data; boundary={boundary}'
                 
-                # 将普通form数据转换为multipart格式
-                form_data = ""
+                # 构建multipart数据，支持多值字段
+                multipart_data = ""
+                
+                # 处理特殊的多值字段
+                multi_value_fields = {
+                    'areas': [],
+                    'weekdays': []
+                }
+                
+                # 分离多值字段
+                filtered_data = {}
                 for key, value in data.items():
-                    form_data += f"--{boundary}\r\n"
-                    form_data += f"Content-Disposition: form-data; name=\"{key}\"\r\n\r\n"
-                    form_data += f"{value}\r\n"
-                form_data += f"--{boundary}--\r\n"
+                    if key.startswith('HomeModel.SearchByDateTimeModel.SelectedArea_'):
+                        multi_value_fields['areas'].append(value)
+                    elif key.startswith('HomeModel.SelectedWeekDays_'):
+                        multi_value_fields['weekdays'].append(value)
+                    else:
+                        filtered_data[key] = value
                 
-                kwargs['data'] = form_data
-            # 如果是字符串类型且包含 RequestVerificationToken 但未指定Content-Type
-            elif isinstance(data, str) and 'RequestVerificationToken' in data and 'content-type' not in headers:
-                headers['content-type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
+                # 添加基本字段
+                for key, value in filtered_data.items():
+                    multipart_data += f"--{boundary}\r\n"
+                    multipart_data += f'Content-Disposition: form-data; name="{key}"\r\n\r\n'
+                    multipart_data += f"{value}\r\n"
+                
+                # 添加多值字段（相同名称多次出现）
+                for area in multi_value_fields['areas']:
+                    multipart_data += f"--{boundary}\r\n"
+                    multipart_data += 'Content-Disposition: form-data; name="HomeModel.SearchByDateTimeModel.SelectedArea"\r\n\r\n'
+                    multipart_data += f"{area}\r\n"
+                
+                for weekday in multi_value_fields['weekdays']:
+                    multipart_data += f"--{boundary}\r\n"
+                    multipart_data += 'Content-Disposition: form-data; name="HomeModel.SelectedWeekDays"\r\n\r\n'
+                    multipart_data += f"{weekday}\r\n"
+                
+                multipart_data += f"--{boundary}--\r\n"
+                
+                kwargs['data'] = multipart_data
+            elif isinstance(data, str) and 'RequestVerificationToken' in data:
+                # 如果已经是字符串格式，保持URL编码
+                if 'content-type' not in headers and 'Content-Type' not in headers:
+                    headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
         
         kwargs['headers'] = headers
         max_retries = API_CONFIG.get("retry_times", 3)
@@ -238,51 +270,46 @@ class YokohamaFacilityAPI:
                 }
             )
             
-            # 准备URL编码的表单数据（处理多值字段）
-            form_data = ""
-            
-            # 添加基本字段
-            basic_fields = {
+            # 构建表单数据（基于HAR分析的正确格式）
+            # 根据HAR分析，浏览器使用的正确参数
+            form_data = {
                 'HomeModel.SearchByDateTimeModel.SelectedPurposeCategory': str(purpose_category),
                 'HomeModel.SearchByDateTimeModel.SelectedPurpose': '1',
                 'HomeModel.DateFrom': date_from,
                 'HomeModel.DateTo': date_to,
                 'HomeModel.TimeFrom': time_from,
                 'HomeModel.TimeTo': time_to,
-                'HomeModel.SelectedSearchTarget': '1',
-                'HomeModel.SelectedPlaceClassCategory': str(place_class_category),
+                'HomeModel.SelectedSearchTarget': '1',  # HAR显示应该是'1'
+                'HomeModel.SearchByDateTimeModel.SelectedPlaceClassCategory': str(place_class_category),
                 'HomeModel.SelectedPurposeCategory': str(purpose_category),
+                'HomeModel.SelectedPlaceClassCategory': str(place_class_category),
                 'SelectedLanguageCode': '0',
                 '__RequestVerificationToken': self.token
             }
             
-            # 将字段转换为URL编码格式
-            for key, value in basic_fields.items():
-                if form_data:
-                    form_data += "&"
-                form_data += f"{key}={value}"
+            # 添加区域参数（使用字典形式，多个值通过multipart处理）
+            for i, area in enumerate(areas):
+                form_data[f'HomeModel.SearchByDateTimeModel.SelectedArea_{i}'] = str(area)
                 
-            # 添加区域参数（多个同名字段）
-            for area in areas:
-                form_data += f"&HomeModel.SearchByDateTimeModel.SelectedArea={area}"
-                
-            # 添加星期参数（多个同名字段）
-            for weekday in SEARCH_CONFIG["default_weekdays"]:
-                form_data += f"&HomeModel.SelectedWeekDays={weekday}"
+            # 添加星期参数
+            for i, weekday in enumerate(SEARCH_CONFIG["default_weekdays"]):
+                form_data[f'HomeModel.SelectedWeekDays_{i}'] = str(weekday)
 
             search_url = f"{self.base_url}/Home/SearchByDateTime"
             print(f"正在发送搜索请求: {search_url}")
             print(f"请求参数: {form_data}")
             
+            # 使用基于HAR分析的正确请求头
             response = self._make_request(
                 "POST",
                 search_url,
-                data=form_data,  # 使用拼接好的表单数据
+                data=form_data,
                 headers={
                     "Accept": "application/json, text/plain, */*",
-                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept-Language": "en,zh-CN;q=0.9,zh;q=0.8,ja;q=0.7",
+                    "Origin": "https://www.shisetsu.city.yokohama.lg.jp",
                     "Referer": f"{self.base_url}/Home",
-                    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                    # Content-Type 将由 _make_request 方法设置为 multipart/form-data
                 }
             )
             
@@ -290,6 +317,28 @@ class YokohamaFacilityAPI:
             import json
             result = response.json()
             print(f"收到响应: {json.dumps(result, ensure_ascii=False, indent=2)}")
+            
+            # 检查是否有错误
+            if isinstance(result, dict) and result.get("Result") == "Error":
+                error_code = result.get("Information", "未知错误")
+                print(f"服务器返回错误: {error_code}")
+                
+                # 处理特定错误代码
+                if error_code == "E-yokohama-202-000014":
+                    print("错误分析: 这通常表示请求参数验证失败或会话状态异常")
+                    print("建议: 检查请求参数格式和会话token有效性")
+                elif error_code.startswith("E-yokohama-202"):
+                    print("错误分析: 系统参数验证失败")
+                    print("建议: 检查日期、时间、区域等参数是否符合要求")
+                
+                # 尝试重新初始化会话
+                print("尝试重新初始化会话...")
+                if self._init_session():
+                    print("会话重新初始化成功，请稍后重试")
+                else:
+                    print("会话重新初始化失败")
+                
+                return result  # 返回错误信息供上层处理
             
             # 如果返回的是相对路径，需要获取实际数据
             if isinstance(result, dict) and "Information" in result and isinstance(result["Information"], str) and (result["Information"].startswith("./") or result["Information"].startswith("/")):

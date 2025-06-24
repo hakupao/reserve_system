@@ -61,7 +61,7 @@ class LoginHandler:
             return False
             
         # 等待登录表单加载
-        time.sleep(0.5)
+        time.sleep(2)
         
         # 输入邮箱
         if not self.element_handler.input_text(
@@ -133,7 +133,7 @@ class LoginHandler:
                 return False
         
         # 等待登录完成
-        time.sleep(0.5)
+        time.sleep(2)
         logger.info("登录过程完成")
         return True
     
@@ -162,27 +162,96 @@ class LoginHandler:
         
         logger.info("网页已重新加载完成")
         
-        # 点击幹事メニュー按钮
-        if not self.element_handler.click_element(
-            By.ID, 
-            "edit-popup-open-button", 
-            10, 
-            "幹事メニュー按钮"
-        ):
-            logger.error("无法找到幹事メニュー按钮")
-            return False
+        # 等待广告加载完成
+        time.sleep(3)
         
-        # 等待并点击イベントを編集する链接
-        if not self.element_handler.click_element(
-            By.XPATH, 
-            "//a[contains(@href, '/schedule/editEvent')]", 
-            10, 
-            "イベントを編集する链接"
-        ):
-            logger.error("无法找到イベントを編集する链接")
-            return False
+        # 尝试点击幹事メニュー按钮，最多重试3次
+        for attempt in range(3):
+            try:
+                # 尝试多个选择器
+                selectors = [
+                    # 1. 使用ID选择器
+                    (By.ID, "edit-popup-open-button"),
+                    # 2. 使用class组合
+                    (By.CSS_SELECTOR, "button.c-btn.c-btn-primary.size-s.fill.c-icon.menu-host"),
+                    # 3. 使用包含文本的XPath
+                    (By.XPATH, "//button[.//div[contains(text(), '幹事メニュー')]]"),
+                    # 4. 使用父元素定位
+                    (By.CSS_SELECTOR, ".event-header__menu__right__host-menu button"),
+                    # 5. 使用完整的class路径
+                    (By.CSS_SELECTOR, ".event-header__menu__right__host-menu .c-btn.c-btn-primary")
+                ]
+                
+                for by, value in selectors:
+                    try:
+                        if self.element_handler.click_element(
+                            by,
+                            value,
+                            5,
+                            f"幹事メニュー按钮 ({by}={value})"
+                        ):
+                            logger.info(f"使用选择器 {by}={value} 成功点击幹事メニュー按钮")
+                            break
+                    except Exception as e:
+                        logger.debug(f"选择器 {by}={value} 点击失败: {str(e)}")
+                        continue
+                else:
+                    # 如果所有选择器都失败，等待后重试
+                    time.sleep(2)
+                    continue
+                
+                # 等待弹出菜单加载
+                time.sleep(2)
+                
+                # 尝试点击イベントを編集する链接，最多重试3次
+                for edit_attempt in range(3):
+                    try:
+                        # 尝试多个选择器
+                        edit_selectors = [
+                            # 1. 使用href和class组合
+                            (By.CSS_SELECTOR, "a[href*='/schedule/editEvent'] div.edit-popup__content__menu"),
+                            # 2. 使用data-v属性
+                            (By.CSS_SELECTOR, "a[data-v-6df4c216] div[data-v-6df4c216]"),
+                            # 3. 使用文本内容
+                            (By.XPATH, "//a[.//div[contains(text(), 'イベントを編集する')]]"),
+                            # 4. 使用href
+                            (By.CSS_SELECTOR, "a[href*='/schedule/editEvent']"),
+                            # 5. 使用class
+                            (By.CSS_SELECTOR, "div.edit-popup__content__menu.color-normal.c-icon.edit")
+                        ]
+                        
+                        for by, value in edit_selectors:
+                            try:
+                                if self.element_handler.click_element(
+                                    by,
+                                    value,
+                                    5,
+                                    f"イベントを編集する链接 ({by}={value})"
+                                ):
+                                    logger.info(f"使用选择器 {by}={value} 成功点击イベントを編集する链接")
+                                    logger.info("成功导航到编辑页面")
+                                    return True
+                            except Exception as e:
+                                logger.debug(f"选择器 {by}={value} 点击失败: {str(e)}")
+                                continue
+                        
+                        # 如果所有选择器都失败，等待后重试
+                        time.sleep(2)
+                        
+                    except Exception as e:
+                        logger.error(f"点击イベントを編集する链接时出错: {str(e)}")
+                        time.sleep(2)
+                        continue
+                
+                # 如果所有尝试都失败，返回False
+                logger.error("无法点击イベントを編集する链接")
+                return False
+                
+            except Exception as e:
+                logger.error(f"点击幹事メニュー按钮时出错: {str(e)}")
+                time.sleep(2)
+                continue
         
-        # 等待页面加载完成
-        time.sleep(1)
-        logger.info("成功导航到编辑页面")
-        return True 
+        # 如果所有尝试都失败，返回False
+        logger.error("无法点击幹事メニュー按钮")
+        return False 

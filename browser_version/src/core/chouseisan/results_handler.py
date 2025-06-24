@@ -62,29 +62,48 @@ class ResultsHandler:
         """
         logger.info("开始删除现有时间段...")
         
-        # 使用XPath找到所有带有垃圾图标的按钮
-        garbage_buttons = self.element_handler.find_elements(
-            By.XPATH, 
-            "//a[contains(@class, 'garbage')]", 
-            10,
-            "删除按钮"
-        )
+        # 等待页面加载完成
+        time.sleep(2)
+        
+        # 使用多个选择器查找删除按钮
+        selectors = [
+            # 1. 使用class和data-v属性
+            (By.CSS_SELECTOR, "a.garbage[data-v-a6b7f302]"),
+            # 2. 使用class和img组合
+            (By.CSS_SELECTOR, "a.garbage img.block"),
+            # 3. 使用alt属性
+            (By.XPATH, "//a[contains(@class, 'garbage')]//img[contains(@alt, '_delete_button')]"),
+            # 4. 使用class
+            (By.CSS_SELECTOR, "a.garbage")
+        ]
+        
+        garbage_buttons = []
+        for by, value in selectors:
+            try:
+                buttons = self.element_handler.find_elements(
+                    by,
+                    value,
+                    5,
+                    f"删除按钮 ({by}={value})"
+                )
+                if buttons:
+                    garbage_buttons = buttons
+                    logger.info(f"使用选择器 {by}={value} 找到 {len(buttons)} 个删除按钮")
+                    break
+            except Exception as e:
+                logger.debug(f"选择器 {by}={value} 未找到按钮: {str(e)}")
+                continue
         
         if not garbage_buttons:
             logger.warning("未找到任何删除按钮")
             # 即使没有按钮，也尝试获取输入框
-            textarea = self.element_handler.find_element(
-                By.ID, 
-                "kouho", 
-                10, 
-                "输入框"
-            )
+            textarea = self.find_textarea()
             if textarea:
                 return True, textarea
             else:
                 return False, None
         
-        logger.info(f"找到 {len(garbage_buttons)} 个的删除按钮")
+        logger.info(f"找到 {len(garbage_buttons)} 个删除按钮")
         
         # 依次点击每个按钮
         for i, button in enumerate(garbage_buttons, 1):
@@ -93,9 +112,20 @@ class ResultsHandler:
                 alt_text = button.find_element(By.TAG_NAME, "img").get_attribute("alt")
                 logger.info(f"正在点击第 {i} 个按钮: {alt_text}")
                 
-                # 点击按钮
-                button.click()
-                time.sleep(0.5)  # 等待一下，避免点击太快
+                # 滚动到按钮位置
+                self.driver.execute_script("arguments[0].scrollIntoView(true);", button)
+                time.sleep(2)  # 等待滚动完成
+                
+                # 尝试使用JavaScript点击
+                try:
+                    self.driver.execute_script("arguments[0].click();", button)
+                    logger.info(f"使用JavaScript点击第 {i} 个按钮成功")
+                except Exception as e:
+                    logger.debug(f"JavaScript点击失败，尝试普通点击: {str(e)}")
+                    button.click()
+                    logger.info(f"使用普通点击第 {i} 个按钮成功")
+                
+                time.sleep(2)  # 等待点击响应
                 
             except Exception as e:
                 logger.error(f"点击第 {i} 个按钮时出错: {str(e)}")
@@ -103,18 +133,46 @@ class ResultsHandler:
         
         logger.info("所有时间段的删除按钮已点击完成")
         
-        # 等待输入框加载
-        textarea = self.element_handler.find_element(
-            By.ID, 
-            "kouho", 
-            10, 
-            "输入框"
-        )
-        
+        # 等待并获取输入框
+        textarea = self.find_textarea()
         if textarea:
             return True, textarea
         else:
             return False, None
+    
+    def find_textarea(self):
+        """查找输入框"""
+        # 使用多个选择器查找输入框
+        selectors = [
+            # 1. 使用ID和class组合
+            (By.CSS_SELECTOR, "textarea#kouho.form-textarea.choice-textarea"),
+            # 2. 使用ID和data-v属性
+            (By.CSS_SELECTOR, "textarea#kouho[data-v-a6b7f302]"),
+            # 3. 使用ID
+            (By.ID, "kouho"),
+            # 4. 使用name属性
+            (By.NAME, "kouho_add"),
+            # 5. 使用placeholder内容
+            (By.XPATH, "//textarea[contains(@placeholder, '候補の区切りは改行で判断されます')]")
+        ]
+        
+        for by, value in selectors:
+            try:
+                textarea = self.element_handler.find_element(
+                    by,
+                    value,
+                    5,
+                    f"输入框 ({by}={value})"
+                )
+                if textarea:
+                    logger.info(f"使用选择器 {by}={value} 找到输入框")
+                    return textarea
+            except Exception as e:
+                logger.debug(f"选择器 {by}={value} 未找到输入框: {str(e)}")
+                continue
+        
+        logger.error("未找到输入框")
+        return None
     
     def update_with_search_results(self, textarea):
         """
@@ -158,34 +216,45 @@ class ResultsHandler:
             
             # 尝试获取name输入框并填入当前日期时间
             try:
-                # 首先尝试使用CSS选择器
-                name_input = self.element_handler.find_element(
-                    By.CSS_SELECTOR, 
-                    "p[data-v-6fb79e1f] input#name", 
-                    5, 
-                    "name输入框"
-                )
+                # 定义多个选择器，按优先级排序
+                selectors = [
+                    # 1. 精确匹配当前版本
+                    (By.CSS_SELECTOR, "p[data-v-a6b7f302] input#name.form-input"),
+                    # 2. 匹配任何data-v-*属性
+                    (By.CSS_SELECTOR, "p[data-v-] input#name.form-input"),
+                    # 3. 只匹配class和id
+                    (By.CSS_SELECTOR, "input#name.form-input"),
+                    # 4. 使用name属性
+                    (By.NAME, "name"),
+                    # 5. 使用XPath
+                    (By.XPATH, "//input[@name='name' and @type='text']")
+                ]
+                
+                name_input = None
+                for by, value in selectors:
+                    try:
+                        name_input = self.element_handler.find_element(
+                            by,
+                            value,
+                            3,
+                            f"name输入框 ({by}={value})"
+                        )
+                        if name_input:
+                            logger.info(f"使用选择器 {by}={value} 找到name输入框")
+                            break
+                    except Exception as e:
+                        logger.debug(f"选择器 {by}={value} 未找到元素: {str(e)}")
+                        continue
                 
                 if name_input:
                     # 清空并输入当前日期时间
                     name_input.clear()
                     name_input.send_keys(f"更新日期: {current_datetime}")
                     logger.info(f"已在name输入框中填入当前日期时间: {current_datetime}")
-            except Exception:
-                # 尝试其他可能的选择器
-                try:
-                    name_input = self.element_handler.find_element(
-                        By.ID, 
-                        "name", 
-                        3, 
-                        "备用name输入框"
-                    )
-                    if name_input:
-                        name_input.clear()
-                        name_input.send_keys(f"更新日期: {current_datetime}")
-                        logger.info(f"已在备用name输入框中填入当前日期时间: {current_datetime}")
-                except Exception as e:
-                    logger.warning(f"未找到name输入框，将继续保存: {str(e)}")
+                else:
+                    logger.warning("未找到任何name输入框，将继续保存")
+            except Exception as e:
+                logger.warning(f"处理name输入框时出错，将继续保存: {str(e)}")
             
             # 点击保存按钮
             if not self.element_handler.click_element(

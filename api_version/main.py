@@ -14,8 +14,8 @@ def main():
     # 创建API客户端
     api = YokohamaFacilityAPI()
     
-    # 获取日期范围
-    date_from, date_to = get_date_range(days=30)
+    # 获取日期范围（修复：30天太长，改为7天）
+    date_from, date_to = get_date_range(days=7)
     
     print_log("开始搜索设施...", "INFO")
     print_log(f"搜索日期范围: {date_from} 至 {date_to}", "INFO")
@@ -30,6 +30,23 @@ def main():
     )
     
     if results:
+        # 检查是否是错误响应
+        if isinstance(results, dict) and results.get("Result") == "Error":
+            error_code = results.get("Information", "未知错误")
+            print_log(f"搜索失败，错误代码: {error_code}", "ERROR")
+            
+            # 根据错误类型提供解决建议
+            if error_code == "E-yokohama-202-000014":
+                print_log("错误分析: 请求参数验证失败", "ERROR")
+                print_log("可能原因:", "INFO")
+                print_log("1. 日期格式不正确", "INFO")
+                print_log("2. 时间范围无效", "INFO")
+                print_log("3. 区域ID不存在", "INFO")
+                print_log("4. 会话token已过期", "INFO")
+                print_log("建议: 检查配置文件中的参数设置", "INFO")
+            
+            return  # 提前退出
+        
         # 创建输出目录
         timestamp, output_dir = create_output_directory(OUTPUT_CONFIG["output_dir"])
         
