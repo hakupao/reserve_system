@@ -1,16 +1,29 @@
 """
-调整さん(chouseisan.com)网站配置文件
+调整さん(chouseisan.com)网站配置文件。
+
+默认从仓库根目录的 .env 读取配置，避免把个人账号信息提交到仓库。
 """
 
-# 调整さん网站URL配置
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+load_dotenv(REPO_ROOT / ".env")
+
+
+def _env_flag(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 CHOUSEISAN_CONFIG = {
-    # 要打开的网站URL
-    'url': 'https://chouseisan.com/s?h=aaceb5f22df84356b662da1da6bef191',  # 羽毛球活动URL
-    
-    # 登录信息
-    'email': 'qq531458594@gmail.com',  # 请填入您的邮箱账号
-    'password': '2Eynd2BkV@q@N3f',  # 请填入您的密码
-    
-    # 可选：是否使用无头模式（不显示浏览器界面）
-    'headless': False,
-} 
+    "url": os.getenv("CHOUSEISAN_URL", ""),
+    "email": os.getenv("CHOUSEISAN_EMAIL", ""),
+    "password": os.getenv("CHOUSEISAN_PASSWORD", ""),
+    "headless": _env_flag("CHOUSEISAN_HEADLESS", default=False),
+}

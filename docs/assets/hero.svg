@@ -1,0 +1,58 @@
+<svg width="1200" height="420" viewBox="0 0 1200 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="68" y1="38" x2="1081" y2="413" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="0.55" stop-color="#0B3B44"/>
+      <stop offset="1" stop-color="#14532D"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="1200" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="24" flood-color="#020617" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+
+  <rect x="16" y="16" width="1168" height="388" rx="28" fill="url(#bg)"/>
+  <circle cx="1000" cy="98" r="96" fill="#22C55E" fill-opacity="0.08"/>
+  <circle cx="1108" cy="292" r="132" fill="#38BDF8" fill-opacity="0.10"/>
+  <circle cx="140" cy="54" r="84" fill="#F8FAFC" fill-opacity="0.05"/>
+
+  <g filter="url(#shadow)">
+    <rect x="78" y="90" width="500" height="248" rx="24" fill="url(#card)" stroke="#E2E8F0" stroke-opacity="0.14"/>
+    <rect x="650" y="72" width="184" height="86" rx="18" fill="url(#card)" stroke="#E2E8F0" stroke-opacity="0.14"/>
+    <rect x="860" y="72" width="262" height="86" rx="18" fill="url(#card)" stroke="#E2E8F0" stroke-opacity="0.14"/>
+    <rect x="650" y="184" width="472" height="66" rx="18" fill="url(#card)" stroke="#E2E8F0" stroke-opacity="0.14"/>
+    <rect x="650" y="276" width="472" height="62" rx="18" fill="url(#card)" stroke="#E2E8F0" stroke-opacity="0.14"/>
+  </g>
+
+  <text x="108" y="138" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="18" letter-spacing="2">PERSONAL AUTOMATION WORKFLOW</text>
+  <text x="108" y="196" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="44" font-weight="700">reserve_system</text>
+  <text x="108" y="238" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="22">
+    Search public facility slots faster.
+  </text>
+  <text x="108" y="272" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="22">
+    Export clean data. Share readable results.
+  </text>
+  <text x="108" y="318" fill="#93C5FD" font-family="Segoe UI, Arial, sans-serif" font-size="17">
+    Browser automation + API probing + CSV / JSON / PNG output
+  </text>
+
+  <text x="680" y="108" fill="#86EFAC" font-family="Segoe UI, Arial, sans-serif" font-size="14" letter-spacing="1.4">ROUTE A</text>
+  <text x="680" y="136" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Browser automation</text>
+
+  <text x="890" y="108" fill="#7DD3FC" font-family="Segoe UI, Arial, sans-serif" font-size="14" letter-spacing="1.4">ROUTE B</text>
+  <text x="890" y="136" fill="white" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700">Direct API access</text>
+
+  <text x="678" y="223" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="22">
+    Same goal, different trade-offs:
+  </text>
+  <text x="678" y="252" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    local browser compatibility / lightweight requests client
+  </text>
+
+  <text x="678" y="314" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="600">
+    Built for real reservation hunting, not a toy dashboard.
+  </text>
+</svg>
