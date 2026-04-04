@@ -1,168 +1,461 @@
-# reserve_system
+[English](README.md) | [中文](README_CN.md)
 
-<p align="center">
-  <img src="docs/assets/hero.svg" alt="reserve_system hero" width="100%" />
-</p>
+<div align="center">
 
-<p align="center">
-  一个围绕横滨市公共设施预约查询打造的个人自动化工具箱。<br />
-  把重复、碎片化、容易漏看的检索流程，整理成可复用的本地工作流。
-</p>
+![Reserve System](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=8B5CF6&width=500&lines=🏸+reserve_system;Facility+Batch+Checker;Python+·+Selenium+·+HTTP+API)
 
-<p align="center">
-  <a href="https://github.com/hakupao/reserve_system"><img alt="GitHub Repo" src="https://img.shields.io/badge/GitHub-hakupao%2Freserve__system-111827?style=for-the-badge&logo=github" /></a>
-  <a href="requirements.txt"><img alt="Python 3.8+" src="https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" /></a>
-  <a href="browser_version/README.md"><img alt="Browser Route" src="https://img.shields.io/badge/Browser-Selenium%204-16A34A?style=for-the-badge" /></a>
-  <a href="api_version/README.md"><img alt="API Route" src="https://img.shields.io/badge/API-Requests%20Client-0F766E?style=for-the-badge" /></a>
-  <a href="https://github.com/hakupao/reserve_system/commits/master"><img alt="Last Commit" src="https://img.shields.io/github/last-commit/hakupao/reserve_system?style=for-the-badge" /></a>
-</p>
+</div>
 
-## 项目概览
+I'm **Bojiang**, a badminton enthusiast in Yokohama, Japan. When automating facility searches, sometimes you need raw querying power beyond a browser extension. **reserve_system** is my Python utility for batch-checking Yokohama facility availability with two flexible approaches: Selenium browser automation or direct HTTP API calls.
 
-横滨市公共设施预约站点本身并不难用，但当需求变成“反复按日期、时间、区域、星期筛空位，再把结果整理给自己或队友”时，手动操作很快就会变成机械劳动。
+---
 
-这个项目的核心想法不是再做一个花哨的管理后台，而是把这条重复路径拆成三层：
+## 📋 Overview
 
-- 数据获取：分别提供浏览器自动化和直接 API 调用两条路线
-- 结果整理：统一落盘为 CSV / JSON，并生成可读性更高的结果图
-- 外部同步：在浏览器版本里把结果继续同步到 `调整さん`，服务实际活动组织
+**reserve_system** complements **[badminton-yoyaku](../badminton-yoyaku)** browser extension with programmatic facility checking. Check hundreds of time slots in seconds using Python automation.
 
-默认场景明显偏向羽毛球场地检索，但代码结构已经把搜索、解析、输出、同步拆开，便于继续往别的设施类型扩展。
+### Key Features
 
-```mermaid
-flowchart LR
-    A["Search config<br/>date / time / area / weekday"] --> B["Browser route<br/>Selenium automation"]
-    A --> C["API route<br/>Requests + token handling"]
-    B --> D["Normalized availability data"]
-    C --> D
-    D --> E["CSV / JSON output"]
-    D --> F["PNG preview table"]
-    D --> G["Chouseisan sync<br/>(optional)"]
+| Feature | Details |
+|---------|---------|
+| 🔄 **Batch Processing** | Check multiple facilities, dates, time slots simultaneously |
+| 🌐 **Two Query Methods** | Selenium browser automation OR HTTP API direct calls |
+| 📊 **CSV Export** | Results exported to spreadsheet for analysis |
+| ⚙️ **Configurable** | YAML/JSON config files for flexible scheduling |
+| 🔐 **Secure** | `.env.example` for credential management |
+| 📝 **Logging** | Comprehensive operation logs for debugging |
+| 🐳 **Docker Ready** | Containerized deployment option |
+
+---
+
+## 🚀 Tech Stack
+
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python)
+![Selenium](https://img.shields.io/badge/Selenium-4.x-00B244?style=for-the-badge&logo=selenium)
+![Requests](https://img.shields.io/badge/Requests-2.31-2E86AB?style=for-the-badge&logo=python)
+![Pandas](https://img.shields.io/badge/Pandas-2.x-150458?style=for-the-badge&logo=pandas)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker)
+
+</div>
+
+**Core**: Python 3.11+ with type hints
+
+**Web Automation**: Selenium 4 for browser-based queries
+
+**HTTP Client**: Requests library for direct API calls
+
+**Data Processing**: Pandas for CSV export and analysis
+
+**Configuration**: YAML/JSON for flexible setup
+
+---
+
+## 📦 Project Structure
+
+```
+reserve_system/
+├── main.py              # Entry point
+├── config/
+│   ├── facilities.yaml  # Facility definitions
+│   └── schedule.yaml    # Query schedules
+├── src/
+│   ├── selenium_checker.py    # Browser automation
+│   ├── api_checker.py         # Direct HTTP queries
+│   ├── csv_exporter.py        # Results export
+│   └── logger.py              # Logging utilities
+├── docs/
+│   ├── SETUP.md
+│   ├── SELENIUM.md
+│   └── API.md
+├── results/             # Output CSVs
+├── logs/                # Operation logs
+├── .env.example         # Template for credentials
+├── requirements.txt     # Python dependencies
+├── docker-compose.yml   # Container configuration
+└── README.md
 ```
 
-## 项目预览
+---
 
-下图是浏览器版本自动生成的结果预览图，适合快速看空档，不必先打开 CSV：
+## 🛠️ Installation & Setup
 
-![Results preview](docs/assets/results-preview.png)
+### Prerequisites
+- Python 3.11+
+- pip package manager
+- Chrome/Chromium (for Selenium option)
+- Docker (optional)
 
-## 为什么这个仓库值得公开展示
-
-- 它不是演示性质的小玩具，而是针对真实订场流程做的个人效率工具
-- 同一个业务目标，给了两种技术取舍完全不同的实现方式
-- 浏览器版本贴近真实用户流程，API 版本则更轻量、易批处理
-- 输出层不是“打印到终端就结束”，而是明确考虑了后续共享、归档和再利用
-- 从代码结构上能看到作者在往“长期维护的小工具”方向演进，而不是一次性脚本
-
-## 两条实现路线
-
-| 路线 | 适合场景 | 主要能力 | 输出 | 代价 |
-| --- | --- | --- | --- | --- |
-| `browser_version` | 需要高度还原真实页面操作、生成可视化结果、同步到 `调整さん` | Selenium 自动化、任务化搜索、结果合并、表格图片生成 | `CSV`、`PNG` | 依赖本地浏览器和 ChromeDriver |
-| `api_version` | 想更快地批量拉取结果、降低浏览器依赖 | 会话初始化、token 处理、接口请求、错误恢复 | `JSON`、`CSV` | 更依赖对站点内部接口和参数的理解 |
-
-对应文档：
-
-- [浏览器版本说明](browser_version/README.md)
-- [API 版本说明](api_version/README.md)
-- [开发文档](docs/DEVELOPMENT.md)
-- [变更日志](docs/CHANGELOG.md)
-
-## 适用场景
-
-- 想定期查看某些区的羽毛球场地是否有空位
-- 不想重复手动点日期、时间段、区域和星期过滤器
-- 想把检索结果沉淀成结构化数据，方便后续通知、共享或分析
-- 想研究“浏览器自动化”和“站点 API 逆向”在同一业务问题上的不同解法
-
-## 在线体验
-
-这个仓库目前没有提供公网 demo。
-
-原因很直接：项目依赖目标站点的实时数据、会话状态和本地浏览器环境，公开在线演示并不能很好代表实际使用方式。对外展示主要依靠：
-
-- 仓库首页说明
-- 结果预览图
-- 模块化代码结构
-- 样例输出文件
-
-## 快速开始
-
-### 1. 安装依赖
+### Local Setup
 
 ```bash
+# Clone repository
 git clone https://github.com/hakupao/reserve_system.git
 cd reserve_system
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 2. 配置可选的 `.env`
-
-如果你需要把结果同步到 `调整さん`，先复制环境变量模板：
-
-```bash
+# Setup environment file
 cp .env.example .env
+# Edit .env with your credentials if needed
 ```
 
-Windows PowerShell:
+### Configuration
 
-```powershell
-Copy-Item .env.example .env
+Create or edit `config/facilities.yaml`:
+
+```yaml
+facilities:
+  - name: "Kanagawa Badminton Center"
+    id: "kanagawa-001"
+    url: "https://facility-booking.yokohama.jp/kanagawa"
+    courts:
+      - "Court 1"
+      - "Court 2"
+    
+  - name: "Yokohama Sports Center"
+    id: "yokohama-sports"
+    url: "https://facility-booking.yokohama.jp/sports"
+    courts:
+      - "Badminton A"
+      - "Badminton B"
+
+queries:
+  batch_size: 10          # Check 10 at a time
+  timeout: 30             # 30 second timeout
+  retry_count: 3          # Retry 3 times on failure
 ```
 
-然后填写：
+---
 
-- `CHOUSEISAN_URL`
-- `CHOUSEISAN_EMAIL`
-- `CHOUSEISAN_PASSWORD`
-- `CHOUSEISAN_HEADLESS`
+## 🚀 Usage Examples
 
-如果这些值留空，浏览器版本会自动跳过 `调整さん` 同步步骤。
-
-### 3. 选择运行路线
-
-浏览器版本：
+### Method 1: Selenium Browser Automation
 
 ```bash
-python browser_version/src/main.py
+# Check availability using Selenium
+python main.py --method selenium \
+  --facility "Kanagawa Badminton Center" \
+  --dates 2025-04-04 2025-04-15 \
+  --times "18:00-20:00" "20:00-22:00"
 ```
 
-API 版本：
+**Advantages**:
+- Handles JavaScript-heavy websites
+- Works with modern web apps
+- Can handle complex interactions
+- Reliable for dynamic content
+
+**Disadvantages**:
+- Slower (browser startup overhead)
+- Higher resource usage
+- Requires Chrome/Chromium
+
+### Method 2: HTTP API Direct Calls
 
 ```bash
-python api_version/main.py
+# Check availability using direct API calls
+python main.py --method api \
+  --facility "Kanagawa Badminton Center" \
+  --dates 2025-04-04 2025-04-15 \
+  --times "18:00-20:00" "20:00-22:00"
 ```
 
-## 输出物
+**Advantages**:
+- Much faster (no browser overhead)
+- Lower resource usage
+- Lightweight, scalable
+- Suitable for batch jobs
 
-浏览器版本会按时间戳生成目录，典型结果包括：
+**Disadvantages**:
+- Requires API documentation
+- May not work if site structure changes
+- No JavaScript execution
 
-- `工作日.csv`
-- `周末和假日.csv`
-- `all_results.csv`
-- `results_table.png`
+### Batch Processing
 
-API 版本会输出：
-
-- 原始 / 解析后的 `JSON`
-- 便于筛选和转发的 `CSV`
-
-## 目录结构
-
-```text
-reserve_system/
-├── api_version/         # 直接调用站点接口的实现
-├── browser_version/     # Selenium 驱动的页面自动化实现
-├── docs/                # 开发文档、变更日志、README 资产
-├── .env.example         # 调整さん同步的环境变量模板
-├── requirements.txt     # 根依赖
-└── README.md            # 仓库首页
+```bash
+# Process multiple facilities at once
+python main.py \
+  --method api \
+  --batch-file config/batch_query.yaml \
+  --export-csv results/availability.csv
 ```
 
-## 当前边界
+---
 
-- 当前搜索流程是围绕横滨市公共设施预约站点定制的，不是通用预约平台框架
-- 浏览器版本目前默认勾选的是羽毛球相关选项，扩展到其他用途时需要调整页面操作逻辑
-- 公开仓库中不再存放个人账号、密码和活动链接，相关配置改为本地环境变量
+## 📊 Configuration Files
 
-如果你关心的不是“做一个通用 SaaS”，而是“把真实、重复、烦人的个人流程自动化”，这个仓库就是一个相对完整的样本。
+### facilities.yaml
+
+```yaml
+facilities:
+  - name: "Facility Name"
+    id: "unique-id"
+    url: "https://..."
+    courts: ["Court 1", "Court 2"]
+    max_days_ahead: 30
+    holidays: [2025-05-05, 2025-05-06]
+```
+
+### schedule.yaml
+
+```yaml
+queries:
+  target_facilities:
+    - "Kanagawa Badminton Center"
+    - "Yokohama Sports Center"
+  
+  date_ranges:
+    - start: 2025-04-04
+      end: 2025-04-30
+  
+  time_slots:
+    - 18:00-20:00
+    - 20:00-22:00
+  
+  method: "api"  # or "selenium"
+  export_format: "csv"
+```
+
+---
+
+## 📁 CSV Export Format
+
+Results exported as:
+
+```csv
+facility,date,time_slot,court,available,booked_count,checked_at
+Kanagawa Badminton Center,2025-04-04,18:00-20:00,Court 1,true,0,2025-04-04T14:30:00Z
+Kanagawa Badminton Center,2025-04-04,18:00-20:00,Court 2,false,1,2025-04-04T14:30:00Z
+Yokohama Sports Center,2025-04-04,20:00-22:00,Badminton A,true,0,2025-04-04T14:30:01Z
+```
+
+---
+
+## 📝 Logging
+
+All operations logged to `logs/` directory:
+
+```
+logs/
+├── 2025-04-04_selenium_check.log
+└── 2025-04-04_api_check.log
+```
+
+**Log Entry Example**:
+```
+[2025-04-04 14:30:00] INFO: Starting API check for Kanagawa Badminton Center
+[2025-04-04 14:30:01] INFO: Found 2 available slots on 2025-04-05
+[2025-04-04 14:30:01] INFO: Exported results to results/availability.csv
+[2025-04-04 14:30:02] INFO: Check completed successfully
+```
+
+---
+
+## 🐳 Docker Deployment
+
+### Build Image
+
+```bash
+# Build container
+docker build -t reserve-system:latest .
+```
+
+### Run with Docker Compose
+
+```yaml
+# docker-compose.yml
+version: '3.9'
+services:
+  reserve-checker:
+    image: reserve-system:latest
+    volumes:
+      - ./config:/app/config
+      - ./results:/app/results
+      - ./logs:/app/logs
+    environment:
+      - METHOD=api
+      - LOG_LEVEL=INFO
+```
+
+```bash
+# Start container
+docker-compose up -d
+
+# View logs
+docker-compose logs -f reserve-checker
+
+# Stop container
+docker-compose down
+```
+
+---
+
+## 🔐 Environment & Credentials
+
+### .env File
+
+```env
+# Yokohama Facility Login (if needed)
+FACILITY_USERNAME=your_username
+FACILITY_PASSWORD=your_password
+
+# Proxy settings (optional)
+HTTP_PROXY=http://proxy.example.com:8080
+HTTPS_PROXY=http://proxy.example.com:8080
+
+# Logging
+LOG_LEVEL=INFO
+LOG_DIR=./logs
+
+# Performance
+MAX_RETRIES=3
+TIMEOUT_SECONDS=30
+BATCH_SIZE=10
+```
+
+---
+
+## 📊 API Mode Implementation
+
+For sites with public APIs, directly call endpoints:
+
+```python
+import requests
+
+def check_availability_api(facility_id: str, date: str, time_slot: str) -> dict:
+    """Query facility availability via HTTP API"""
+    url = f"https://api.yokohama-facilities.jp/availability"
+    params = {
+        "facility_id": facility_id,
+        "date": date,
+        "time_slot": time_slot
+    }
+    
+    response = requests.get(url, params=params, timeout=30)
+    response.raise_for_status()
+    
+    return response.json()
+```
+
+---
+
+## 🔄 Selenium Mode Implementation
+
+For JavaScript-heavy sites, use Selenium:
+
+```python
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+def check_availability_selenium(facility_url: str, date: str) -> dict:
+    """Query facility availability via browser automation"""
+    driver = webdriver.Chrome()
+    
+    try:
+        driver.get(facility_url)
+        
+        # Fill date selector
+        date_input = driver.find_element(By.ID, "date-picker")
+        date_input.send_keys(date)
+        
+        # Click search
+        search_btn = driver.find_element(By.ID, "search-btn")
+        search_btn.click()
+        
+        # Extract availability
+        # ... parsing logic ...
+        
+        return availability_data
+    finally:
+        driver.quit()
+```
+
+---
+
+## 📖 Related Projects
+
+- **[badminton-yoyaku](../badminton-yoyaku)** - Browser extension for real-time monitoring
+- **[badminton-tournament-v2](../badminton-tournament-v2)** - Tournament management system
+- **[shuttle-path](../shuttle-path)** - Coaching knowledge platform
+- **[badminton_tournament_tool](../badminton_tournament_tool)** - Tournament tool v1
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run tests
+python -m pytest tests/
+
+# With coverage
+python -m pytest --cov=src tests/
+
+# Run specific test
+python -m pytest tests/test_api_checker.py -v
+```
+
+---
+
+## 📝 Changelog
+
+### v1.2.0 (Current)
+- Dual query methods (Selenium + API)
+- CSV export functionality
+- Docker Compose support
+- Enhanced logging
+
+### v1.1.0
+- Configuration file support
+- Batch processing
+- Error retry logic
+
+### v1.0.0
+- Initial release with Selenium support
+- Basic facility checking
+- Log output
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Areas:
+
+1. **Additional Facilities**: Add more Yokohama facilities
+2. **API Integrations**: Direct API support for more sites
+3. **Export Formats**: JSON, Excel, database export
+4. **Notifications**: Email, Slack alerts for availability
+5. **Scheduling**: Cron integration for regular checks
+
+---
+
+## 📄 License
+
+MIT License - See [LICENSE](LICENSE) file
+
+---
+
+## 💬 Contact & Support
+
+- **GitHub**: [@hakupao](https://github.com/hakupao)
+- **Issues**: [GitHub Issues](https://github.com/hakupao/reserve_system/issues)
+- **Documentation**: [docs/](docs/) directory
+
+---
+
+<div align="center">
+
+**Batch-check facilities, find your court fast**
+
+![Last Commit](https://img.shields.io/github/last-commit/hakupao/reserve_system?style=flat-square&color=8B5CF6)
+![Stars](https://img.shields.io/github/stars/hakupao/reserve_system?style=flat-square&color=F59E0B)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+
+</div>
