@@ -28,6 +28,14 @@ I'm **Bojiang**, a badminton enthusiast in Yokohama, Japan. When automating faci
 
 ---
 
+
+
+### Output Preview
+
+<div align="center">
+  <img src="docs/assets/results-preview.png" alt="Results Preview" width="600"/>
+</div>
+
 ## 🚀 Tech Stack
 
 <div align="center">

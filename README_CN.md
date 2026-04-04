@@ -28,6 +28,14 @@
 
 ---
 
+
+
+### 输出预览
+
+<div align="center">
+  <img src="docs/assets/results-preview.png" alt="结果预览" width="600"/>
+</div>
+
 ## 🚀 技术栈
 
 <div align="center">
