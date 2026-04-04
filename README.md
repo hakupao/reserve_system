@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Reserve System](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=8B5CF6&width=500&lines=🏸+reserve_system;Facility+Batch+Checker;Python+·+Selenium+·+HTTP+API)
+![Reserve System](https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=8B5CF6&width=500&lines=%F0%9F%8F%B8+reserve_system;Facility+Batch+Checker;Python+%C2%B7+Selenium+%C2%B7+HTTP+API)
 
 </div>
 
